@@ -1,0 +1,37 @@
+services:
+  - type: web
+    name: gpt-app-service
+    env: python
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: |
+      echo "Creating Tesseract directory..."
+      mkdir -p /app/Tesseract
+      echo "Creating Poppler directory..."
+      mkdir -p /app/Poppler/bin
+      
+      echo "Downloading Tesseract..."
+      curl -L https://github.com/DerSenseiisback/Vertrag/raw/main/Source%20Files/Tesseract/tesseract.exe -o /app/Tesseract/tesseract.exe
+      if [ ! -f /app/Tesseract/tesseract.exe ]; then echo "Tesseract download failed"; exit 1; fi
+      
+      echo "Checking Tesseract file..."
+      ls -l /app/Tesseract/tesseract.exe
+      if [ ! -x /app/Tesseract/tesseract.exe ]; then chmod +x /app/Tesseract/tesseract.exe; fi
+      ls -l /app/Tesseract/tesseract.exe
+      
+      echo "Downloading Poppler files..."
+      curl -L https://github.com/DerSenseiisback/Vertrag/raw/main/Source%20Files/Poppler/Library/bin/pdftoppm.exe -o /app/Poppler/bin/pdftoppm.exe
+      curl -L https://github.com/DerSenseiisback/Vertrag/raw/main/Source%20Files/Poppler/Library/bin/pdftocairo.exe -o /app/Poppler/bin/pdftocairo.exe
+      curl -L https://github.com/DerSenseiisback/Vertrag/raw/main/Source%20Files/Poppler/Library/bin/pdfimages.exe -o /app/Poppler/bin/pdfimages.exe
+      curl -L https://github.com/DerSenseiisback/Vertrag/raw/main/Source%20Files/Poppler/Library/bin/pdftotext.exe -o /app/Poppler/bin/pdftotext.exe
+      
+      # Überprüfen, ob alle Dateien heruntergeladen wurden
+      if [ ! -f /app/Poppler/bin/pdftoppm.exe ] || [ ! -f /app/Poppler/bin/pdftocairo.exe ] || [ ! -f /app/Poppler/bin/pdfimages.exe ] || [ ! -f /app/Poppler/bin/pdftotext.exe ]; then
+          echo "Poppler files download failed"; exit 1;
+      fi
+
+      export TESSERACT_PATH=/app/Tesseract/tesseract.exe
+      export POPPLER_PATH=/app/Poppler/bin
+      echo "TESSERACT_PATH set to: $TESSERACT_PATH"
+      echo "POPPLER_PATH set to: $POPPLER_PATH"
+      echo "Starting application..."
+      python GPT-App.py

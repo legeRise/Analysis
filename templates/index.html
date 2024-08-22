@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kreditvertragsanalyse (BETA)</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css">
+    <style>
+        /* Bestehende CSS-Stile */
+        body {
+            background-color: #f0f2f5;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .container {
+            margin-top: 40px;
+            max-width: 600px;
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #343a40;
+            text-align: center;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            font-size: 16px;
+            font-weight: 500;
+            color: #495057;
+            margin-bottom: 5px;
+        }
+        .custom-file-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background-color: #f8f9fa;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            padding: 5px 10px;
+            transition: border-color 0.3s ease;
+        }
+        .custom-file-container:hover {
+            border-color: #007bff;
+        }
+        .custom-file-container span {
+            display: block;
+            font-size: 14px;
+            color: #6c757d;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            max-width: 80%;
+        }
+        .custom-file-input {
+            display: none;
+        }
+        .btn-primary, .btn-download {
+            width: 48%;
+            display: inline-block;
+            vertical-align: top;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .btn-primary:hover, .btn-download:hover {
+            background-color: #0056b3;
+        }
+        .btn-download {
+            border: 2px solid #007bff;
+            background-color: #b0c4de;
+            color: #fff;
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+        }
+        .btn-download:disabled {
+            background-color: #b0c4de;
+            border-color: #b0c4de;
+            cursor: not-allowed;
+            color: #fff;
+        }
+        .btn-download.enabled {
+            background: linear-gradient(to right, #007bff, #0056b3);
+            border-color: #0056b3;
+            box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
+        }
+        .button-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+        }
+        .pdf-item {
+            margin-bottom: 15px;
+            padding: 10px;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            background-color: #f8f9fa;
+            position: relative;
+        }
+        .pdf-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .pdf-item-header span {
+            max-width: 35ch;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .pdf-item-body {
+            margin-top: 10px;
+            padding-left: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .addendum-display {
+            display: inline-block;
+            margin-right: 10px;
+            padding: 6px 12px;
+            background-color: #e9ecef;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 12px;
+            color: #495057;
+            max-width: 15ch;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            text-align: center;
+            cursor: pointer;
+            position: relative;
+        }
+        .addendum-display:hover {
+            background-color: #f8f9fa;
+            color: #007bff;
+        }
+        .addendum-display:hover .file-name {
+            display: none;
+        }
+        .addendum-display:hover .delete-text {
+            display: inline;
+        }
+        .file-name {
+            display: inline;
+        }
+        .delete-text {
+            display: none;
+            font-size: 12px;
+            color: #007bff;
+            text-decoration: underline;
+            cursor: pointer;
+        }
+        .addendum-add {
+            margin-right: 10px;
+            padding: 6px 12px;
+            background-color: #f0f2f5;
+            border: 1px dashed #007bff;
+            border-radius: 4px;
+            font-size: 12px;
+            color: #007bff;
+            cursor: pointer;
+            text-align: center;
+        }
+        .addendum-add:hover {
+            background-color: #e1e8f1;
+        }
+        .options-btn {
+            font-size: 20px;
+            color: #6c757d;
+            cursor: pointer;
+            position: relative;
+            padding: 5px;
+        }
+        .options-btn:after {
+            content: "⋮";
+            font-size: 20px;
+        }
+        .options-menu {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 25px;
+            background-color: white;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            padding: 5px 0;
+            width: 150px;
+        }
+        .options-menu a {
+            display: block;
+            padding: 8px 15px;
+            color: #495057;
+            text-decoration: none;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        .options-menu a:hover {
+            background-color: #f8f9fa;
+            color: #007bff;
+        }
+        #loading-animation {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+        }
+        #loading-animation .spinner-border {
+            width: 3rem;
+            height: 3rem;
+            color: #007bff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center">Kreditvertragsanalyse (BETA)</h1>
+        <form id="upload-form" action="/upload" method="post" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="pptFile">PowerPoint-Datei auswählen:</label>
+                <div class="custom-file-container">
+                    <span id="pptFileName">Dateien auswählen oder Drag & Drop</span>
+                    <button type="button" class="btn btn-secondary btn-browse" onclick="document.getElementById('pptFile').click();">Durchsuchen</button>
+                    <input type="file" name="pptFile" id="pptFile" accept=".pptx" class="custom-file-input" onchange="handleFileChange('pptFile', 'pptFileName', 35)">
+                </div>
+            </div>
+            <div id="pdf-list">
+                <div class="form-group">
+                    <label for="pdfFiles">Kreditverträge hochladen:</label>
+                    <div class="custom-file-container">
+                        <span id="pdfFileName">Dateien auswählen oder Drag & Drop</span>
+                        <button type="button" class="btn btn-secondary btn-browse" onclick="document.getElementById('pdfFiles').click();">Durchsuchen</button>
+                        <input type="file" name="files[]" id="pdfFiles" multiple accept=".pdf" class="custom-file-input" onchange="handlePdfFileChange()">
+                    </div>
+                </div>
+            </div>
+            <div class="button-container">
+                <button type="submit" class="btn btn-primary" id="processBtn">Dokumente verarbeiten</button>
+                <button id="downloadBtn" type="button" class="btn btn-download" disabled>Download</button>
+            </div>
+        </form>
+        <div id="loading-animation">
+            <div class="spinner-border" role="status">
+                <span class="sr-only">Verarbeitung läuft...</span>
+            </div>
+            <p>Verarbeitung läuft...</p>
+        </div>
+    </div>
+
+    <script>
+        let pdfCounter = 0;
+        let pdfFiles = [];
+
+        function updateFileName(inputId, spanId, maxLength) {
+            var input = document.getElementById(inputId);
+            var span = document.getElementById(spanId);
+            if (input.files.length > 0) {
+                span.textContent = truncateText(input.files[0].name, maxLength);
+            } else {
+                span.textContent = "Dateien auswählen oder Drag & Drop";
+            }
+        }
+
+        function handleFileChange(inputId, spanId, maxLength) {
+            var input = document.getElementById(inputId);
+            var span = document.getElementById(spanId);
+            if (input.files.length > 0) {
+                span.textContent = truncateText(input.files[0].name, maxLength);
+            } else {
+                span.textContent = "Dateien auswählen oder Drag & Drop";
+            }
+        }
+
+        function handlePdfFileChange() {
+            let inputFiles = document.getElementById('pdfFiles').files;
+            for (let i = 0; i < inputFiles.length; i++) {
+                pdfFiles.push(inputFiles[i]);
+                addPdfItem(inputFiles[i], pdfCounter);
+                pdfCounter++;
+            }
+            document.getElementById('downloadBtn').disabled = true; // Disable the download button when a new file is uploaded
+        }
+
+        function addPdfItem(file, index) {
+            let pdfList = document.getElementById('pdf-list');
+            let pdfItem = document.createElement('div');
+            pdfItem.className = 'pdf-item';
+            pdfItem.innerHTML = `
+                <div class="pdf-item-header">
+                    <span>${truncateText(file.name, 35)}</span>
+                    <span class="options-btn" onclick="toggleOptionsMenu(${index})"></span>
+                    <div id="options-menu-${index}" class="options-menu">
+                        <a onclick="handleAddRemoveAddenda(${index})">+ Nachträge</a>
+                        <a onclick="deletePdfItem(${index})">Löschen</a>
+                    </div>
+                </div>
+                <div id="addenda-list-${index}" class="pdf-item-body"></div>
+            `;
+            pdfList.appendChild(pdfItem);
+        }
+
+        function toggleOptionsMenu(index) {
+            let optionsMenu = document.getElementById(`options-menu-${index}`);
+            if (optionsMenu.style.display === "none" || optionsMenu.style.display === "") {
+                optionsMenu.style.display = "block";
+            } else {
+                optionsMenu.style.display = "none";
+            }
+        }
+
+        function handleAddRemoveAddenda(index) {
+            let optionsMenu = document.getElementById(`options-menu-${index}`);
+            let addendaList = document.getElementById(`addenda-list-${index}`);
+            let addRemoveLink = optionsMenu.querySelector("a");
+
+            if (addRemoveLink.textContent === "+ Nachträge") {
+                showAddendumInput(index);
+                addRemoveLink.textContent = "- Nachträge";
+            } else {
+                // Remove all addenda
+                addendaList.innerHTML = '';
+                addRemoveLink.textContent = "+ Nachträge";
+            }
+
+            optionsMenu.style.display = "none"; // Hide the menu after selection
+        }
+
+        function showAddendumInput(index) {
+            let addendaList = document.getElementById(`addenda-list-${index}`);
+            let addendumInput = document.createElement('span');
+            addendumInput.className = 'addendum-add';
+            addendumInput.textContent = "+ Nachtrag";
+            addendumInput.onclick = function() {
+                let fileInput = document.createElement('input');
+                fileInput.type = 'file';
+                fileInput.accept = '.pdf';
+                fileInput.className = 'custom-file-input';
+                fileInput.style.display = 'none';
+                fileInput.onchange = function() {
+                    displayAddendumName(fileInput, index);
+                };
+                addendaList.appendChild(fileInput);
+                fileInput.click();
+            };
+            addendaList.appendChild(addendumInput);
+        }
+
+        function deletePdfItem(index) {
+            let pdfItems = document.querySelectorAll('.pdf-item');
+            if (index < pdfItems.length) {
+                let pdfItem = pdfItems[index];
+                pdfItem.remove();
+                
+                // Remove the corresponding item from the PDF files array
+                pdfFiles.splice(index, 1);
+        
+                // Re-index the remaining items
+                reIndexItems();
+            }
+        }
+        
+        function reIndexItems() {
+            let pdfItems = document.querySelectorAll('.pdf-item');
+            pdfCounter = 0;
+            pdfItems.forEach((item, i) => {
+                item.querySelector('.options-btn').setAttribute('onclick', `toggleOptionsMenu(${i})`);
+                item.querySelector('.options-menu').setAttribute('id', `options-menu-${i}`);
+                item.querySelector('.options-menu a').setAttribute('onclick', `handleAddRemoveAddenda(${i})`);
+                item.querySelector('.pdf-item-body').setAttribute('id', `addenda-list-${i}`);
+            });
+            pdfCounter = pdfItems.length;
+        }          
+        function displayAddendumName(input, index) {
+            let fileName = input.files[0].name;
+            let displayName = truncateText(fileName, 15);
+            let fileDisplay = document.createElement('span');
+            fileDisplay.className = 'addendum-display';
+            fileDisplay.innerHTML = `
+                <span class="file-name">${displayName}</span>
+                <span class="delete-text">löschen</span>
+            `;
+
+            fileDisplay.onclick = function() {
+                fileDisplay.remove();
+                input.remove();
+            };
+
+            let addendaList = document.getElementById(`addenda-list-${index}`);
+            addendaList.insertBefore(fileDisplay, addendaList.querySelector('.addendum-add')); // Insert before "+ Nachtrag"
+        }
+
+        function truncateText(text, maxLength) {
+            return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
+        }
+
+        document.getElementById('pptFile').addEventListener('change', function() {
+            handleFileChange('pptFile', 'pptFileName', 35);
+        });
+
+        document.getElementById('upload-form').onsubmit = function(e) {
+            e.preventDefault();
+
+            // Disable the process button to prevent multiple submissions
+            var processBtn = document.getElementById('processBtn');
+            processBtn.disabled = true;
+
+            // Show loading animation
+            var loadingAnimation = document.getElementById('loading-animation');
+            loadingAnimation.style.display = 'block';
+
+            var formData = new FormData(this);
+            for (let i = 0; i < pdfFiles.length; i++) {
+                formData.append('files[]', pdfFiles[i]);
+            }
+
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "/upload", true);
+
+            xhr.onload = function() {
+                if (xhr.status === 200) {
+                    var response = JSON.parse(xhr.responseText);
+
+                    // Enable the download button if the download link exists
+                    if (response.download_link) {
+                        var downloadBtn = document.getElementById('downloadBtn');
+                        downloadBtn.disabled = false;
+                        downloadBtn.classList.add('enabled'); // Apply the enabled style
+                        downloadBtn.onclick = function() {
+                            window.location.href = response.download_link;
+                        };
+
+                        // Hide loading animation
+                        loadingAnimation.style.display = 'none';
+
+                        // Re-enable the process button
+                        processBtn.disabled = false;
+                    }
+                } else {
+                    console.error('Error during the request:', xhr.statusText);
+                }
+            };
+
+            xhr.onerror = function() {
+                console.error('Request failed');
+            };
+
+            xhr.send(formData);
+        };
+    </script>
+</body>
+</html>
