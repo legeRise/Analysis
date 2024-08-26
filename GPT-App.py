@@ -12,36 +12,42 @@ from PyPDF2 import PdfReader
 import re
 import logging
 from pptx import Presentation
+from dotenv import load_dotenv
+import os 
+load_dotenv()
 
 app = Flask(__name__, template_folder='templates')
 
 # OpenAI API-Schlüssel festlegen
-api_key = "My_API_TOKEN"
+# api_key = "My_API_TOKEN"
+api_key = os.getenv("MY_API_TOKEN",None)
+
+
 openai.api_key = api_key
 
 logger = logging.getLogger(__name__)
 
 # Setze die Pfade
-tesseract_path = "/app/Tesseract/tesseract.exe"
-pytesseract.pytesseract.tesseract_cmd = tesseract_path
+# tesseract_path = "Source-Files/Tesseract/tesseract.exe"
+# pytesseract.pytesseract.tesseract_cmd = tesseract_path
 
-poppler_path = "/app/Poppler/bin"
+# poppler_path = "Source-Files/Poppler/Library/bin"
 
-# Überprüfe, ob Tesseract existiert
-if not tesseract_path or not os.path.isfile(tesseract_path):
-    logger.error(f"Tesseract-Pfad ist nicht korrekt gesetzt oder die Datei existiert nicht. Pfad: {tesseract_path}")
-    print(f"Error: Tesseract-Pfad ist nicht korrekt gesetzt oder Datei fehlt. Pfad: {tesseract_path}")
-    exit(1)
-else:
-    logger.info(f"Tesseract-Pfad korrekt gesetzt: {tesseract_path}")
+# # Überprüfe, ob Tesseract existiert
+# if not tesseract_path or not os.path.isfile(tesseract_path):
+#     logger.error(f"Tesseract-Pfad ist nicht korrekt gesetzt oder die Datei existiert nicht. Pfad: {tesseract_path}")
+#     print(f"Error: Tesseract-Pfad ist nicht korrekt gesetzt oder Datei fehlt. Pfad: {tesseract_path}")
+#     exit(1)
+# else:
+#     logger.info(f"Tesseract-Pfad korrekt gesetzt: {tesseract_path}")
 
 # Überprüfe, ob Poppler existiert
-if not poppler_path or not os.path.isdir(poppler_path):
-    logger.error(f"Poppler-Pfad ist nicht korrekt gesetzt oder das Verzeichnis existiert nicht. Pfad: {poppler_path}")
-    print(f"Error: Poppler-Pfad ist nicht korrekt gesetzt oder Verzeichnis fehlt. Pfad: {poppler_path}")
-    exit(1)
-else:
-    logger.info(f"Poppler-Pfad korrekt gesetzt: {poppler_path}")
+# if not poppler_path or not os.path.isdir(poppler_path):
+#     logger.error(f"Poppler-Pfad ist nicht korrekt gesetzt oder das Verzeichnis existiert nicht. Pfad: {poppler_path}")
+#     print(f"Error: Poppler-Pfad ist nicht korrekt gesetzt oder Verzeichnis fehlt. Pfad: {poppler_path}")
+#     exit(1)
+# else:
+#     logger.info(f"Poppler-Pfad korrekt gesetzt: {poppler_path}")
 
 # Set the folder to save uploaded files
 UPLOAD_FOLDER = os.path.join(os.getcwd(), 'uploads')
@@ -56,7 +62,7 @@ def get_pdf_page_count(pdf_path):
 def extract_text_from_page(pdf_path, page_index):
     try:
         # Stelle sicher, dass poppler_path korrekt gesetzt ist
-        images = convert_from_path(pdf_path, first_page=page_index + 1, last_page=page_index + 1, poppler_path=poppler_path, dpi=150)
+        images = convert_from_path(pdf_path, first_page=page_index + 1, last_page=page_index + 1, dpi=150)
         if images:
             # OCR mit Tesseract durchführen
             page_text = pytesseract.image_to_string(images[0], lang='deu')
@@ -391,4 +397,4 @@ def download(filename):
 if __name__ == '__main__':
     if not os.path.exists(UPLOAD_FOLDER):
         os.makedirs(UPLOAD_FOLDER)
-    app.run(debug=True)
+    app.run(host='0.0.0.0',port=5000, debug=True)
